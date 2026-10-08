@@ -91,3 +91,13 @@ describe('helpers', () => {
     expect(classify('Datenleck bei Online-Händler')).toContain('breach');
   });
 });
+
+describe('image proxy guard', () => {
+  it('only proxies public http(s) image URLs', async () => {
+    const { isPublicHttpUrl } = await import('../src/news/aggregator.js');
+    expect(isPublicHttpUrl('https://cdn.example.org/a.jpg')).toBe(true);
+    for (const bad of ['http://127.0.0.1/x.png', 'http://169.254.169.254/latest', 'http://10.0.0.5/a.jpg', 'http://localhost:8080/a.png', 'http://[::1]/a.png', 'file:///etc/passwd', 'http://192.168.1.1/x.jpg']) {
+      expect(isPublicHttpUrl(bad)).toBe(false);
+    }
+  });
+});

@@ -128,6 +128,22 @@ export function normalizeItems(feed: FeedConfig, items: FeedItem[]): NewsItem[] 
   return out;
 }
 
+/** Feed-supplied image URLs must not point the server at local or private addresses. */
+export function isPublicHttpUrl(raw: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal')) return false;
+  if (/^(?:127|10|0)\.|^169\.254\.|^192\.168\.|^172\.(?:1[6-9]|2\d|3[01])\.|^100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(host)) return false;
+  if (host.includes(':') && (host === '::1' || host.startsWith('fc') || host.startsWith('fd') || host.startsWith('fe80') || host === '::')) return false;
+  return true;
+}
+
 async function readLimited(res: Response, maxBytes: number): Promise<Buffer> {
   const reader = res.body?.getReader();
   if (!reader) return Buffer.alloc(0);
@@ -317,8 +333,8 @@ export class NewsAggregator {
     const cached = this.imageCache.get(id);
     if (cached) return cached;
     const item = this.items.find((i) => i.id === id);
-    if (!item?.image) return null;
-    const res = await this.fetchImpl(item.image, { headers: { 'user-agent': USER_AGENT }, signal: AbortSignal.timeout(10000), redirect: 'follow' });
+    if (!item?.image || !isPublicHttpUrl(item.image)) return null;
+    const res = await this.fetchImpl(item.image,{ headers: { 'user-agent': USER_AGENT }, signal: AbortSignal.timeout(10000), redirect: 'follow' });
     const type = res.headers.get('content-type') ?? '';
     if (!res.ok || !/^image\/(?:jpeg|png|webp|gif|avif)/i.test(type)) return null;
     const data = await readLimited(res, 3 * 1024 * 1024);

@@ -1,0 +1,22 @@
+services:
+  scamcheck:
+    image: ghcr.io/raphael597/scamcheck:latest
+    build: .
+    container_name: scamcheck
+    restart: unless-stopped
+    init: true
+    ports:
+      - "8080:8080"
+    # All settings are optional (see .env.example). AI provider and API key can
+    # also be configured later in the admin area at /admin.
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - scamcheck-data:/data
+    # Lets the container reach Ollama/LM Studio on the host via host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  scamcheck-data:
