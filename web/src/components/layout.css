@@ -246,8 +246,15 @@ main {
   margin-top: 36px;
   padding-top: 20px;
   border-top: 1px solid var(--line);
+  display: grid;
+  gap: 6px;
   font-size: 0.88rem;
   color: var(--ink-3);
+}
+
+.footer-legal p {
+  margin: 0;
+  max-width: 78ch;
 }
 
 .footer-legal strong {

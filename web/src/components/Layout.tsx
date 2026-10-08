@@ -13,8 +13,8 @@ const NAV = [
   { to: '/ratgeber', label: 'Ratgeber', icon: BookOpen },
 ];
 
-/** Company behind the site, shown in the footer. */
-const OPERATOR = 'Veydex UG (haftungsbeschränkt)';
+/** Project partner that co-developed the site, credited in the footer. */
+const PARTNER = 'Veydex UG (haftungsbeschränkt)';
 
 type Theme = 'system' | 'light' | 'dark';
 
@@ -144,9 +144,11 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className="container footer-legal">
-          <span>
-            © {new Date().getFullYear()} ScamCheck · Diese Seite ist Teil der <strong>{OPERATOR}</strong>
-          </span>
+          <span>© {new Date().getFullYear()} ScamCheck</span>
+          <p>
+            Diese Webseite wurde im Rahmen einer Projektpartnerschaft in Kooperation mit der <strong>{PARTNER}</strong> co-developed. Die Veydex UG wurde dabei durch ihren
+            Geschäftsführer vertreten.
+          </p>
         </div>
       </footer>
 
