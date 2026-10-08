@@ -188,7 +188,7 @@ Voraussetzung: Node.js ≥ 20.
 ```bash
 npm install
 npm run dev        # API auf :8080 und Vite-Dev-Server auf :5173 (mit Proxy)
-npm test           # 66 Tests (Mustererkennung, Links, Webseiten-Check, API, KI-Anbieter, News)
+npm test           # 69 Tests (Mustererkennung, Links, Webseiten-Check, API, KI-Anbieter, News, Auslieferung)
 npm run typecheck
 npm run build      # baut web/dist und server/dist
 npm start          # Produktionsserver (liefert auch das Frontend aus)

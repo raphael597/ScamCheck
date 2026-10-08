@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
+import os from 'node:os';
 import path from 'node:path';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -272,5 +273,30 @@ describe('AI analysis via Anthropic API', () => {
     } finally {
       server.close();
     }
+  });
+});
+
+describe('frontend hosting', () => {
+  const webDist = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'scamcheck-web-'));
+  fs.writeFileSync(path.join(webDist, 'index.html'), '<!doctype html><title>ScamCheck</title>');
+  fs.writeFileSync(path.join(webDist, 'favicon.ico'), Buffer.from([0, 0, 1, 0]));
+  const { app } = makeTestApp({ webDist });
+
+  it('serves the app shell for client-side routes', async () => {
+    const res = await request(app).get('/ratgeber');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/html');
+  });
+
+  it('serves static files such as the favicon', async () => {
+    const res = await request(app).get('/favicon.ico');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/icon/);
+  });
+
+  it('answers missing files with 404 instead of the app shell', async () => {
+    const res = await request(app).get('/apple-touch-icon-precomposed.png');
+    expect(res.status).toBe(404);
+    expect(res.text).not.toContain('<title>ScamCheck</title>');
   });
 });

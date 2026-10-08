@@ -77,7 +77,10 @@ export function createApp(ctx: AppContext) {
         },
       }),
     );
-    app.get(/^(?!\/api\/).*/, (_req, res) => {
+    app.get(/^(?!\/api\/).*/, (req, res, next) => {
+      // A missing file (e.g. /robots.txt) gets a real 404 – serving the app shell instead
+      // makes browsers treat HTML as an icon or script.
+      if (path.extname(req.path)) return next();
       res.setHeader('Cache-Control', 'no-cache');
       res.sendFile(indexHtml);
     });
