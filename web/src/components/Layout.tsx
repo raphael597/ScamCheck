@@ -13,6 +13,9 @@ const NAV = [
   { to: '/ratgeber', label: 'Ratgeber', icon: BookOpen },
 ];
 
+/** Company behind the site, shown in the footer. */
+const OPERATOR = 'Veydex UG (haftungsbeschränkt)';
+
 type Theme = 'system' | 'light' | 'dark';
 
 function useTheme(): [Theme, () => void] {
@@ -139,6 +142,11 @@ export function Layout({ children }: { children: ReactNode }) {
               <Lock size={14} aria-hidden="true" /> Betreiber-Bereich
             </Link>
           </div>
+        </div>
+        <div className="container footer-legal">
+          <span>
+            © {new Date().getFullYear()} ScamCheck · Diese Seite ist Teil der <strong>{OPERATOR}</strong>
+          </span>
         </div>
       </footer>
 
