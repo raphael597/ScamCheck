@@ -1,0 +1,114 @@
+.progress-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 44px);
+  padding: clamp(16px, 3vw, 28px);
+  align-items: center;
+  animation: rise-in 500ms var(--ease-out) both;
+}
+
+.progress-scene {
+  box-shadow: 0 0 0 1px var(--visor-line), 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+}
+
+.progress-body h2 {
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  margin: 10px 0 20px;
+}
+
+.progress-eyebrow {
+  color: var(--cyan);
+}
+
+.progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+
+.progress-bar span {
+  display: block;
+  height: 100%;
+  width: calc(var(--p) * 100%);
+  min-width: 8%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--blue-500), var(--cyan), var(--teal-500));
+  box-shadow: 0 0 16px var(--cyan);
+  transition: width 500ms var(--ease-out);
+}
+
+.progress-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.pstep {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--visor-ink-2);
+  transition: color 300ms;
+}
+
+.pstep-dot {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--visor-line);
+  color: var(--cyan);
+  transition:
+    background-color 300ms,
+    border-color 300ms,
+    transform 400ms var(--ease-spring);
+}
+
+.pstep-dot .spinner {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.pstep.is-active {
+  color: var(--visor-ink);
+  font-weight: 650;
+}
+
+.pstep.is-active .pstep-dot {
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px rgba(63, 214, 255, 0.5);
+}
+
+.pstep.is-done {
+  color: var(--visor-ink);
+}
+
+.pstep.is-done .pstep-dot {
+  background: var(--teal-500);
+  border-color: var(--teal-500);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.pstep.is-todo {
+  opacity: 0.55;
+}
+
+.progress-note {
+  margin: 22px 0 0;
+  font-size: 0.86rem;
+  color: var(--visor-ink-2);
+}
+
+@media (max-width: 820px) {
+  .progress-panel {
+    grid-template-columns: 1fr;
+  }
+}

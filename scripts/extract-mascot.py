@@ -23,11 +23,16 @@ BG = (245, 247, 251)
 # name: (crop box on sheet, erase boxes in sheet coordinates, intersect with flood fill)
 POSES = {
     "hero": ((40, 10, 592, 640), [(522, 388, 600, 640)], False),
-    "friendly": ((528, 325, 790, 612), [(528, 325, 580, 388)], True),
+    "friendly": ((528, 316, 790, 612), [(528, 316, 580, 388)], True),
     "curious": ((800, 325, 1020, 612), [], True),
     "protect": ((1030, 325, 1275, 612), [], True),
     "reliable": ((1278, 325, 1520, 612), [], True),
 }
+# Light parts the segmentation tends to drop: (pose, centre x, centre y, radius) in sheet coordinates.
+RESTORE_CIRCLES = [
+    ("friendly", 701, 339, 13),
+]
+
 SCENES = {
     "scene-laptop": (3, 664, 618, 996),
     "scene-peek": (631, 664, 946, 996),
@@ -62,16 +67,24 @@ def flood_foreground(im: Image.Image) -> np.ndarray:
     return np.asarray(fg) > 0
 
 
-def cutout(session, sheet: Image.Image, box, erase, intersect: bool) -> Image.Image:
+def cutout(session, sheet: Image.Image, name: str, box, erase, intersect: bool) -> Image.Image:
     im = sheet.crop(box)
     draw = ImageDraw.Draw(im)
     for e in erase:
         draw.rectangle((e[0] - box[0], e[1] - box[1], e[2] - box[0], e[3] - box[1]), fill=BG)
     cut = remove(im, session=session, post_process_mask=True)
+    alpha = np.asarray(cut.getchannel("A")).copy()
     if intersect:
-        alpha = np.asarray(cut.getchannel("A")).copy()
         alpha[~flood_foreground(im)] = 0
-        cut.putalpha(Image.fromarray(alpha))
+    yy, xx = np.mgrid[0:alpha.shape[0], 0:alpha.shape[1]]
+    for pose, cx, cy, r in RESTORE_CIRCLES:
+        if pose != name:
+            continue
+        dist = np.sqrt((xx - (cx - box[0])) ** 2 + (yy - (cy - box[1])) ** 2)
+        circle = np.clip((r + 0.5 - dist) * 255, 0, 255).astype(np.uint8)
+        alpha = np.maximum(alpha, circle)
+    cut = Image.fromarray(np.asarray(im.convert("RGBA")).copy())
+    cut.putalpha(Image.fromarray(alpha))
     bbox = cut.getbbox()
     pad = 4
     return cut.crop((max(bbox[0] - pad, 0), max(bbox[1] - pad, 0),
@@ -83,7 +96,7 @@ def main() -> None:
     sheet = Image.open(SHEET).convert("RGB")
     session = new_session("isnet-general-use")
     for name, (box, erase, intersect) in POSES.items():
-        img = cutout(session, sheet, box, erase, intersect)
+        img = cutout(session, sheet, name, box, erase, intersect)
         img.save(OUT / f"{name}.webp", "WEBP", quality=92, method=6)
         print(f"{name}.webp {img.size}")
     for name, box in SCENES.items():
