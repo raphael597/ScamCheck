@@ -1,6 +1,7 @@
 import { BookOpen, CirclePlay, House, LifeBuoy, Lock, Monitor, Moon, Newspaper, ScanSearch, Sun } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { useMeta } from '../hooks/useMeta';
 import { Logo } from './Logo';
 import './layout.css';
 
@@ -11,6 +12,9 @@ const NAV = [
   { to: '/news', label: 'News', icon: Newspaper },
   { to: '/ratgeber', label: 'Ratgeber', icon: BookOpen },
 ];
+
+/** Company behind the site, shown in the footer. */
+const OPERATOR = 'Veydex UG (haftungsbeschränkt)';
 
 type Theme = 'system' | 'light' | 'dark';
 
@@ -40,6 +44,7 @@ function useTheme(): [Theme, () => void] {
 
 export function Layout({ children }: { children: ReactNode }) {
   const [theme, nextTheme] = useTheme();
+  const { meta } = useMeta();
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
 
@@ -130,12 +135,18 @@ export function Layout({ children }: { children: ReactNode }) {
           <div>
             <h4>Datenschutz</h4>
             <p className="muted small">
-              Eingaben werden nur für die Prüfung verarbeitet und nicht gespeichert. Ist ein KI-Anbieter aktiv, wird der Text dafür an diesen übermittelt. Dein Verlauf bleibt nur in diesem Browser.
+              Eingaben werden nur für die Prüfung verarbeitet und nicht gespeichert. Ist ein KI-Anbieter aktiv, wird der Text dafür an diesen übermittelt.
+              {meta?.web?.fetchPages ? ' Enthaltene Links ruft der Server zur Prüfung ab.' : ''} Dein Verlauf bleibt nur in diesem Browser.
             </p>
             <Link to="/admin" className="admin-link">
               <Lock size={14} aria-hidden="true" /> Betreiber-Bereich
             </Link>
           </div>
+        </div>
+        <div className="container footer-legal">
+          <span>
+            © {new Date().getFullYear()} ScamCheck · Diese Seite ist Teil der <strong>{OPERATOR}</strong>
+          </span>
         </div>
       </footer>
 

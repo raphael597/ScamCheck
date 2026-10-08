@@ -6,6 +6,8 @@ import './progress.css';
 interface Props {
   ai: boolean;
   hasImages: boolean;
+  /** The server opens links from the text (page inspection enabled and a link present). */
+  opensLinks?: boolean;
   /** Set when the server answered – remaining steps finish quickly, then onComplete fires. */
   done: boolean;
   onComplete: () => void;
@@ -14,17 +16,18 @@ interface Props {
 const STEP_MS = 650;
 
 /** Shows Checky at work while the analysis runs. Steps follow real progress: the AI step waits for the server. */
-export function AnalysisProgress({ ai, hasImages, done, onComplete }: Props) {
+export function AnalysisProgress({ ai, hasImages, opensLinks = false, done, onComplete }: Props) {
   const steps = useMemo(
     () => [
       hasImages ? 'Screenshot und Text werden gelesen' : 'Text wird gelesen',
       'Über 30 Betrugsmaschen werden verglichen',
-      'Links werden untersucht – aber nie geöffnet',
+      opensLinks ? 'Verlinkte Seite wird abgeschirmt geöffnet – ohne Skripte' : 'Aufbau der Links wird untersucht',
       ...(ai ? ['KI wägt alle Hinweise ab'] : []),
       'Empfehlung wird formuliert',
     ],
-    [ai, hasImages],
+    [ai, hasImages, opensLinks],
   );
+  // The step that waits for the server: the AI step, otherwise the last one.
   const waitIndex = ai ? 3 : steps.length - 1;
   const [active, setActive] = useState(0);
 

@@ -196,7 +196,7 @@ describe('AI analysis via OpenAI-compatible API', () => {
     expect(messages[0]!.content).toContain('Sicherheitsregeln');
     const userParts = messages[1]!.content as { type: string; text?: string; image_url?: { url: string } }[];
     expect(userParts[0]!.text).toContain('<<<INHALT');
-    expect(userParts[0]!.text).toContain('Statische Link-Analyse');
+    expect(userParts[0]!.text).toContain('Aufbau der Links');
     expect(userParts[1]!.image_url!.url).toMatch(/^data:image\/png;base64,/);
   });
 

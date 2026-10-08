@@ -285,9 +285,10 @@ export function heuristicVerdict(report: HeuristicReport, platform: Platform): M
 
   const redFlags = report.signals.slice(0, 8).map((s) => ({
     title: s.label,
-    detail:
-      s.id === 'risky_links' || s.id === 'brand_link_mismatch'
-        ? 'Der Link wurde automatisch untersucht (nicht geöffnet). Details siehe Link-Analyse.'
+    detail: s.id.startsWith('page_')
+      ? 'ScamCheck hat die verlinkte Seite in einer sicheren Umgebung geöffnet und das festgestellt. Details siehe Webseiten-Check.'
+      : s.id === 'risky_links' || s.id === 'brand_link_mismatch'
+        ? 'Aufbau und Domain des Links wurden automatisch untersucht. Details siehe Link-Analyse.'
         : 'Dieses Muster kommt in Betrugsnachrichten häufig vor.',
     evidence: s.matches[0] ?? '',
     severity: (s.weight >= 0.45 ? 'high' : s.weight >= 0.25 ? 'medium' : 'low') as 'low' | 'medium' | 'high',

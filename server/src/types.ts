@@ -98,6 +98,31 @@ export interface UrlFinding {
   issues: string[];
 }
 
+/** What ScamCheck saw when it opened a link from the submission (no JavaScript, sandboxed fetch). */
+export interface PageFinding {
+  url: string;
+  finalUrl: string | null;
+  redirects: string[];
+  status: number | null;
+  ok: boolean;
+  error?: string;
+  title: string;
+  description: string;
+  domain: string | null;
+  hasImprint: boolean | null;
+  hasPrivacy: boolean | null;
+  hasTerms: boolean | null;
+  looksLikeShop: boolean;
+  paymentMethods: string[];
+  asksPassword: boolean;
+  asksPayment: boolean;
+  formTargets: string[];
+  domainCreated: string | null;
+  domainAgeDays: number | null;
+  issues: string[];
+  durationMs: number;
+}
+
 export interface AnalysisInput {
   text: string;
   context: string;
@@ -136,6 +161,7 @@ export interface AnalysisResult extends ModelVerdict {
   categoryLabel: string;
   signals: HeuristicSignal[];
   urls: UrlFinding[];
+  pages: PageFinding[];
   heuristicScore: number;
   engine: EngineInfo;
 }

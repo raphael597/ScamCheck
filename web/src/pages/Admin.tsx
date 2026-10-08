@@ -506,6 +506,8 @@ function NewsTab({ settings, onSaved }: { settings: AdminSettings; onSaved: (s: 
 function LimitsTab({ settings, onSaved }: { settings: AdminSettings; onSaved: (s: AdminSettings) => void }) {
   const [checks, setChecks] = useState(settings.limits.checksPerHour);
   const [explain, setExplain] = useState(settings.limits.explainPerHour);
+  const [web, setWeb] = useState(settings.web);
+  const webLocked = (k: 'fetchPages' | 'domainAge') => settings.locked.includes(`web.${k}`);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const locked = settings.locked.includes('limits.checksPerHour');
@@ -519,7 +521,14 @@ function LimitsTab({ settings, onSaved }: { settings: AdminSettings; onSaved: (s
 
   const save = async () => {
     try {
-      const next = await api.admin.save({ limits: { ...(locked ? {} : { checksPerHour: checks }), explainPerHour: explain } });
+      const next = await api.admin.save({
+        limits: { ...(locked ? {} : { checksPerHour: checks }), explainPerHour: explain },
+        web: {
+          ...(webLocked('fetchPages') ? {} : { fetchPages: web.fetchPages }),
+          ...(webLocked('domainAge') ? {} : { domainAge: web.domainAge }),
+          maxPages: web.maxPages,
+        },
+      });
       onSaved(next);
       setMessage({ ok: true, text: 'Gespeichert.' });
     } catch (err) {
@@ -530,6 +539,32 @@ function LimitsTab({ settings, onSaved }: { settings: AdminSettings; onSaved: (s
   const total = stats?.totalChecks ?? 0;
   return (
     <div className="admin-panel">
+      <div className="panel-head">
+        <h2>Links öffnen</h2>
+        <p className="muted">
+          Enthält eine Prüfung Links, kann der Server die Seiten öffnen: ohne JavaScript und Cookies, mit Zeit- und Größenlimit. Interne Netze und lokale Adressen sind gesperrt.
+          Ausgewertet werden Weiterleitungen, Impressum, Zahlarten, Passwort- und Zahlungsformulare und der Seitentext für die KI. Die Ziel-Seite sieht dabei die IP deines Servers.
+        </p>
+      </div>
+      <div className="form-grid">
+        <label className="toggle span-2">
+          <input type="checkbox" checked={web.fetchPages} onChange={(e) => setWeb((w) => ({ ...w, fetchPages: e.target.checked }))} disabled={webLocked('fetchPages')} />
+          <span>
+            Links aus Prüfungen abgeschirmt öffnen und auswerten <Locked show={webLocked('fetchPages')} />
+          </span>
+        </label>
+        <label className="toggle span-2">
+          <input type="checkbox" checked={web.domainAge} onChange={(e) => setWeb((w) => ({ ...w, domainAge: e.target.checked }))} disabled={webLocked('domainAge') || !web.fetchPages} />
+          <span>
+            Domain-Alter abfragen (RDAP der Registry, z. B. für .com – .de liefert kein Datum) <Locked show={webLocked('domainAge')} />
+          </span>
+        </label>
+        <label className="field">
+          <span className="field-label">Höchstens so viele Links pro Prüfung öffnen</span>
+          <input className="input" type="number" min={1} max={5} value={web.maxPages} onChange={(e) => setWeb((w) => ({ ...w, maxPages: Number(e.target.value) }))} disabled={!web.fetchPages} />
+        </label>
+      </div>
+
       <div className="panel-head">
         <h2>Limits &amp; Statistik</h2>
         <p className="muted">Limits schützen dein KI-Guthaben vor Missbrauch. Sie gelten pro IP-Adresse und Stunde. Hinter einem Reverse-Proxy bitte <code>TRUST_PROXY</code> setzen.</p>
@@ -632,7 +667,7 @@ export default function AdminPage() {
     { id: 'llm', label: 'KI-Anbieter', icon: Bot },
     { id: 'prompt', label: 'System-Prompt', icon: ScrollText },
     { id: 'news', label: 'News-Quellen', icon: Rss },
-    { id: 'limits', label: 'Limits & Statistik', icon: ChartBar },
+    { id: 'limits', label: 'Links & Limits', icon: ChartBar },
   ];
 
   return (

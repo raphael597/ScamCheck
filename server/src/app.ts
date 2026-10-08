@@ -50,6 +50,7 @@ export function createApp(ctx: AppContext) {
       ai: { ready: aiReady, provider: aiReady ? llm.provider : 'none', model: aiReady ? llm.model : null, vision: aiReady && llm.vision },
       limits: { maxImages: ctx.config.maxImages, maxImageMB: Math.round(ctx.config.maxImageBytes / 1024 / 1024), maxTextChars: ctx.config.maxTextChars, checksPerHour: ctx.settings.limits.checksPerHour },
       news: { aiExplain: aiReady && ctx.settings.news.aiExplain },
+      web: { fetchPages: ctx.settings.web.fetchPages },
       stats: ctx.stats.snapshot(),
     });
   });

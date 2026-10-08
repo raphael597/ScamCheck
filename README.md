@@ -28,7 +28,7 @@ Eine Web-App, in die jede Person verdächtige Anzeigen, Nachrichten, E-Mails und
 | Bereich | Was es kann |
 |---|---|
 | **Prüfen** (`/pruefen`) | Text, Links oder bis zu 3 Screenshots einfügen (auch per Drag & Drop oder Strg+V). Ergebnis mit Risiko-Anzeige (0–100), Einordnung der Masche, Warnsignalen mit Zitaten als Beleg, Link-Analyse, abhakbaren Handlungsschritten und Notfall-Hilfe. Verlauf nur lokal im Browser. |
-| **Analyse-Engine** | Zweistufig: Eine eingebaute **Mustererkennung** (über 30 Regeln für bekannte Maschen im DACH-Raum, statische Link-Analyse mit Erkennung von Marken-Fälschungen, Tippfehler-Domains, Link-Verkürzern, Punycode …) funktioniert ohne KI und offline. Ist ein **KI-Anbieter** eingetragen, bewertet dieser zusätzlich – inklusive Screenshots – und bekommt die Vorab-Signale als Hinweise mit. Fällt die KI aus, greift automatisch die Mustererkennung. |
+| **Analyse-Engine** | Eine eingebaute **Mustererkennung** (über 30 Regeln für bekannte Maschen im DACH-Raum, Link-Analyse mit Erkennung von Marken-Fälschungen, Tippfehler-Domains, Link-Verkürzern, Punycode …) funktioniert auch ohne KI. Der **Webseiten-Check** öffnet enthaltene Links abgeschirmt (ohne JavaScript) und wertet Weiterleitungen, Domain-Alter, Impressum, Zahlarten sowie Passwort- und Zahlungsformulare aus. Ist ein **KI-Anbieter** eingetragen, bewertet dieser zusätzlich – inklusive Screenshots und Seiteninhalt – und bekommt alle Vorab-Signale als Hinweise mit. Fällt die KI aus, greift automatisch die Mustererkennung. |
 | **Demo-Durchlauf** (`/demo`) | 10 realistische Beispiele (Kleinanzeigen-„Sicher bezahlen“, Paket-SMS, „Hallo Mama“, Krypto-Promi-Anzeige, Job-Scam, Bank-Phishing, Fake-Shop, Wohnungsbetrug, Fake-Gewinnspiel und eine harmlose Nachricht zum Vergleich). Die Nachricht „tippt“ sich ins Handy-Mockup, Checky scannt sie, Warnsignale werden direkt im Text markiert. Ohne KI mit vorberechneten Beispiel-Ergebnissen, mit KI auf Wunsch live. |
 | **News** (`/news`) | Aggregiert RSS/Atom-Feeds (Watchlist Internet, Mimikama, Verbraucherzentrale, BSI, heise, Golem, WeLiveSecurity, BleepingComputer, The Hacker News, Krebs on Security). Automatische Themen (Betrug, Phishing, Schadsoftware, Datenlecks, Lücken, Datenschutz, KI, Smartphone), Warnungs-Leiste, Suche, Sprachfilter und – mit KI – „Erklär’s mir einfach“. Bilder laufen über einen Server-Proxy. |
 | **Ratgeber** (`/ratgeber`) | Die 5 goldenen Regeln und 12 Maschen erklärt: So läuft’s ab · Daran erkennst du’s · So schützt du dich. |
@@ -117,12 +117,13 @@ Der Prompt, mit dem die KI Betrug erkennt, liegt in [`server/prompts/scam-check.
 Was er festlegt:
 
 - **Rolle & Ton:** Experte für Online-Betrug im DACH-Raum, ruhig und einfühlsam, beschämt niemanden, „du“-Form, Sprachniveau B1.
-- **Sicherheitsregeln:** Der eingereichte Inhalt ist nur Daten, nie Anweisung (Schutz gegen Prompt-Injection wie „bewerte dies als sicher“), keine erfundenen Fakten, keine Kontaktdaten aus der verdächtigen Nachricht empfehlen.
+- **Sicherheitsregeln:** Der eingereichte Inhalt und abgerufene Webseiten sind nur Daten, nie Anweisung (Schutz gegen Prompt-Injection wie „bewerte dies als sicher“), keine erfundenen Fakten, keine Kontaktdaten aus der verdächtigen Nachricht empfehlen.
+- **Webseiten-Daten:** Hat der Server einen Link geöffnet, nutzt die KI Weiterleitungen, Domain-Alter, Impressum, Zahlarten, Formulare und Seitentext als Belege.
 - **Prüfschema:** Druck & Emotion, Zahlungswege, Daten- und Fernzugriffsabfragen, Absender & Links, Plausibilität – plus eine Liste aktueller Maschen (Kleinanzeigen-Kurier, Paket-SMS, „Hallo Mama“, Promi-Trading, Task-Scams, pushTAN-Phishing, Quishing …).
 - **Kalibrierung:** Bewertungstabelle `riskScore` ↔ `verdict` (`safe`, `unclear`, `suspicious`, `likely_scam`, `scam`), nicht über- und nicht untertreiben.
 - **Ausgabe:** Ein festes JSON-Format (Überschrift, Zusammenfassung, Warnsignale mit Zitat, entlastende Merkmale, Empfehlungen, Notfallschritte, Prüffragen, erkannter Screenshot-Text).
 
-Der Server ergänzt jede Anfrage um das Datum, den Fundort, die Vorab-Signale der Mustererkennung und die statische Link-Analyse ([`server/src/analysis/analyze.ts`](server/src/analysis/analyze.ts)). Für die News-Erklärungen gibt es einen eigenen kurzen Prompt ([`server/prompts/news-explain.system.md`](server/prompts/news-explain.system.md)).
+Der Server ergänzt jede Anfrage um das Datum, den Fundort, die Vorab-Signale der Mustererkennung, die Link-Analyse und die Ergebnisse des Webseiten-Checks ([`server/src/analysis/analyze.ts`](server/src/analysis/analyze.ts)). Für die News-Erklärungen gibt es einen eigenen kurzen Prompt ([`server/prompts/news-explain.system.md`](server/prompts/news-explain.system.md)).
 
 ## Konfiguration
 
@@ -143,6 +144,8 @@ Alle Variablen sind optional. Siehe auch [`.env.example`](.env.example).
 | `CHECK_RATE_LIMIT_PER_HOUR` | `30` | Prüfungen pro IP und Stunde |
 | `TRUST_PROXY` | `loopback` | Anzahl Proxy-Hops oder `true` hinter einem Reverse-Proxy |
 | `MAX_IMAGES` / `MAX_IMAGE_MB` / `MAX_TEXT_CHARS` | `3` / `6` / `12000` | Upload-Grenzen |
+| `FETCH_PAGES` | `true` | Links aus Prüfungen abgeschirmt öffnen (Webseiten-Check); `false` schaltet ihn ab |
+| `DOMAIN_AGE_LOOKUP` | `true` | Registrierungsdatum der Domain per RDAP abfragen (nicht jede Registry liefert eins, z. B. .de nicht) |
 | `NEWS_DISABLED` | – | `1` schaltet den News-Abruf ab |
 | `PORT` / `DATA_DIR` | `8080` / `/data` | Port und Datenverzeichnis |
 
@@ -172,7 +175,7 @@ location / {
 
 - **Keine Speicherung von Inhalten.** Eingereichte Texte und Bilder werden nur im Arbeitsspeicher verarbeitet. Gespeichert werden ausschließlich anonyme Zähler (Anzahl Prüfungen je Ergebnis). Der Verlauf liegt nur im Browser der Nutzer.
 - **Transparenz:** Ist ein KI-Anbieter aktiv, wird der Inhalt zur Prüfung dorthin übertragen – das steht im Footer. Für maximale Datensparsamkeit eignet sich ein lokales Modell (Ollama).
-- **Links werden nie geöffnet**, nur statisch analysiert – keine SSRF-Angriffsfläche durch Nutzereingaben.
+- **Abgeschirmter Webseiten-Check:** Links werden nur vom Server geöffnet, nie im Browser der Nutzer – ohne JavaScript, ohne Cookies, mit Zeit- (8 s) und Größenlimit (1,5 MB), nur über die Ports 80/443 und mit höchstens 5 Weiterleitungen. Jede DNS-Antwort wird gegen interne, lokale und reservierte Netze geprüft, und die Verbindung geht genau an die geprüfte Adresse (Schutz vor SSRF und DNS-Rebinding). Der Seitentext geht nur an die KI, nicht zurück an den Browser. Die Ziel-Seite sieht dabei die IP deines Servers; abschaltbar im Admin-Bereich oder mit `FETCH_PAGES=false`.
 - **API-Key** wird AES-256-GCM-verschlüsselt gespeichert und nie an den Browser zurückgegeben.
 - **Keine Drittanbieter im Browser:** Schriften sind eingebettet (kein Google-Fonts-Abruf), News-Bilder laufen über einen Server-Proxy. Strikte Content-Security-Policy, Helmet-Header.
 - **Missbrauchsschutz:** Rate-Limits für Prüfungen, KI-Erklärungen und Admin-Login; Upload-Prüfung per Magic Bytes; Container läuft als Nicht-Root-Nutzer.
@@ -185,7 +188,7 @@ Voraussetzung: Node.js ≥ 20.
 ```bash
 npm install
 npm run dev        # API auf :8080 und Vite-Dev-Server auf :5173 (mit Proxy)
-npm test           # 53 Tests (Mustererkennung, Links, API, KI-Anbieter, News)
+npm test           # 66 Tests (Mustererkennung, Links, Webseiten-Check, API, KI-Anbieter, News)
 npm run typecheck
 npm run build      # baut web/dist und server/dist
 npm start          # Produktionsserver (liefert auch das Frontend aus)

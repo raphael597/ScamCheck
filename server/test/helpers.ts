@@ -12,13 +12,15 @@ import { StatsStore } from '../src/store/stats.js';
 
 export const ADMIN_PASSWORD = 'test-admin-pw';
 
-export function makeTestApp(opts: { env?: NodeJS.ProcessEnv; checksPerHour?: number; fetchImpl?: typeof fetch } = {}) {
+export function makeTestApp(opts: { env?: NodeJS.ProcessEnv; checksPerHour?: number; fetchImpl?: typeof fetch; fetchPages?: boolean } = {}) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scamcheck-test-'));
   const settings = new SettingsStore(dataDir, 'test-secret', opts.env ?? {});
   if (opts.checksPerHour) settings.update({ limits: { checksPerHour: opts.checksPerHour } });
+  // Tests never touch the internet: page inspection only runs against local servers when asked for.
+  settings.update({ web: { fetchPages: opts.fetchPages ?? false, domainAge: false } });
   const news = new NewsAggregator(dataDir, () => settings.feeds(), () => 30, opts.fetchImpl);
   const ctx: AppContext = {
-    config: { ...config, dataDir },
+    config: { ...config, dataDir, fetchAllowPrivate: true },
     settings,
     stats: new StatsStore(dataDir),
     news,
