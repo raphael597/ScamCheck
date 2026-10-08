@@ -25,6 +25,8 @@ export const config = {
   maxImageBytes: int(env.MAX_IMAGE_MB, 6) * 1024 * 1024,
   maxTextChars: int(env.MAX_TEXT_CHARS, 12000),
   newsDisabled: env.NEWS_DISABLED === '1' || env.NODE_ENV === 'test',
+  /** Only flipped in tests: lets the page inspector reach the local test server. */
+  fetchAllowPrivate: false,
   isProduction: env.NODE_ENV === 'production',
 };
 

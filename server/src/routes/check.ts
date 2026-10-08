@@ -48,7 +48,9 @@ export function checkRouter(ctx: AppContext): Router {
       throw new HttpError(400, 'Bitte füge einen Text ein oder lade einen Screenshot hoch.');
     }
 
-    const result = await analyze({ text: body.text, context: body.context, platform: body.platform, images }, ctx.settings);
+    const result = await analyze({ text: body.text, context: body.context, platform: body.platform, images }, ctx.settings, {
+      allowPrivateFetch: ctx.config.fetchAllowPrivate,
+    });
     ctx.stats.record(result.verdict, result.category, result.engine.mode === 'ai');
     res.json(result);
   });

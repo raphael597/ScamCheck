@@ -49,6 +49,15 @@ const storedSchema = z.object({
       explainPerHour: z.number().int().min(1).max(10000).default(30),
     })
     .prefault({}),
+  web: z
+    .object({
+      /** Open links from submissions (sandboxed, no JavaScript) to inspect the target page. */
+      fetchPages: z.boolean().default(true),
+      /** Look up the domain registration date via RDAP. */
+      domainAge: z.boolean().default(true),
+      maxPages: z.number().int().min(1).max(5).default(2),
+    })
+    .prefault({}),
 });
 
 type Stored = z.infer<typeof storedSchema>;
@@ -85,6 +94,14 @@ export const settingsUpdateSchema = z.object({
     })
     .partial()
     .optional(),
+  web: z
+    .object({
+      fetchPages: z.boolean(),
+      domainAge: z.boolean(),
+      maxPages: z.number().int().min(1).max(5),
+    })
+    .partial()
+    .optional(),
 });
 export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;
 
@@ -101,6 +118,7 @@ function envOverrides(env: NodeJS.ProcessEnv) {
           : undefined;
   const providerKey =
     inferredProvider === 'anthropic' ? env.ANTHROPIC_API_KEY : inferredProvider === 'openai' ? env.OPENAI_API_KEY : undefined;
+  const bool = (v?: string) => (v == null || v === '' ? undefined : !['0', 'false', 'no', 'off'].includes(v.toLowerCase()));
   const num = (v?: string) => (v != null && v !== '' && Number.isFinite(Number(v)) ? Number(v) : undefined);
   return {
     provider: inferredProvider,
@@ -112,6 +130,8 @@ function envOverrides(env: NodeJS.ProcessEnv) {
     vision: env.LLM_VISION ? env.LLM_VISION !== 'false' && env.LLM_VISION !== '0' : undefined,
     effort: (['low', 'medium', 'high'] as const).find((e) => e === env.LLM_EFFORT),
     checksPerHour: num(env.CHECK_RATE_LIMIT_PER_HOUR),
+    fetchPages: bool(env.FETCH_PAGES),
+    domainAge: bool(env.DOMAIN_AGE_LOOKUP),
   };
 }
 
@@ -131,6 +151,7 @@ export interface PublicSettings {
   prompt: { systemOverride: string | null; defaultPrompt: string };
   news: Stored['news'];
   limits: Stored['limits'];
+  web: Stored['web'];
   locked: string[];
 }
 
@@ -187,6 +208,8 @@ export class SettingsStore {
       e.vision !== undefined && 'llm.vision',
       e.effort && 'llm.effort',
       e.checksPerHour !== undefined && 'limits.checksPerHour',
+      e.fetchPages !== undefined && 'web.fetchPages',
+      e.domainAge !== undefined && 'web.domainAge',
     ].filter((v): v is string => Boolean(v));
   }
 
@@ -233,6 +256,14 @@ export class SettingsStore {
     return { ...this.stored.limits, checksPerHour: this.env.checksPerHour ?? this.stored.limits.checksPerHour };
   }
 
+  get web() {
+    return {
+      ...this.stored.web,
+      fetchPages: this.env.fetchPages ?? this.stored.web.fetchPages,
+      domainAge: this.env.domainAge ?? this.stored.web.domainAge,
+    };
+  }
+
   feeds(): FeedConfig[] {
     return this.stored.news.feeds;
   }
@@ -256,6 +287,7 @@ export class SettingsStore {
       prompt: { systemOverride: this.stored.prompt.systemOverride, defaultPrompt },
       news: this.stored.news,
       limits: this.limits,
+      web: this.web,
       locked: this.lockedFields,
     };
   }
@@ -275,6 +307,7 @@ export class SettingsStore {
     if (patch.prompt) next.prompt.systemOverride = patch.prompt.systemOverride?.trim() ? patch.prompt.systemOverride : null;
     if (patch.news) Object.assign(next.news, patch.news);
     if (patch.limits) Object.assign(next.limits, patch.limits);
+    if (patch.web) Object.assign(next.web, patch.web);
     this.stored = storedSchema.parse(next);
     this.save();
   }

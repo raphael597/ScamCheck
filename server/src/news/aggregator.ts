@@ -2,10 +2,13 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import Parser from 'rss-parser';
+import { stripHtml } from '../lib/html.js';
 import { writeFileAtomic } from '../store/crypto.js';
 import { classify, isWarning, type Topic } from './classify.js';
 import { sampleNews } from './fallback.js';
 import type { FeedConfig } from './sources.js';
+
+export { stripHtml };
 
 export interface NewsItem {
   id: string;
@@ -66,19 +69,6 @@ const parser: Parser<object, FeedItem> = new Parser({
     ],
   },
 });
-
-const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…', ndash: '–', mdash: '—', laquo: '«', raquo: '»', bdquo: '„', ldquo: '“', rdquo: '”' };
-
-export function stripHtml(html: string): string {
-  return html
-    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n: string) => String.fromCodePoint(Number.parseInt(n, 16)))
-    .replace(/&([a-z]+);/gi, (m, name: string) => ENTITIES[name.toLowerCase()] ?? m)
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 function truncate(text: string, max: number): string {
   if (text.length <= max) return text;

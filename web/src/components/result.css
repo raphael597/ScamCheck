@@ -416,6 +416,136 @@ details[open] > summary .chev {
   color: var(--ink-2);
 }
 
+/* ── Opened pages ── */
+.site-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.site-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.site-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.site-head code {
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+.site-status {
+  flex: none;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+
+.site-status.is-ok {
+  background: var(--safe-bg);
+  color: var(--safe);
+}
+
+.site-status.is-bad {
+  background: var(--scam-bg);
+  color: var(--scam);
+}
+
+.site-title {
+  font-family: var(--font-display);
+  font-weight: 620;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.site-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+
+.site-chain span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.site-chain svg {
+  color: var(--suspicious);
+}
+
+.site-error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink-3);
+}
+
+.site-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.site-facts div {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.site-facts dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.site-facts dd {
+  margin: 2px 0 0;
+  font-weight: 650;
+  font-size: 0.92rem;
+}
+
+.tone-bad {
+  color: var(--scam);
+}
+.tone-warn {
+  color: var(--suspicious);
+}
+.tone-good {
+  color: var(--safe);
+}
+
+.site-issues {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+  display: grid;
+  gap: 4px;
+}
+
 /* ── Signals ── */
 .signals {
   border: 1px solid var(--line);

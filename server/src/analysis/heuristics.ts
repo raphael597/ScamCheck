@@ -44,8 +44,9 @@ function combine(signals: { group: string; weight: number }[]): number {
  * @param text    the suspicious content itself
  * @param context optional notes from the person checking ("seller insists on prepayment") –
  *                scanned for patterns, but not for brand mentions or links
+ * @param extra   evidence from opened links (page signals, redirect targets)
  */
-export function runHeuristics(text: string, context = ''): HeuristicReport {
+export function runHeuristics(text: string, context = '', extra: { signals?: HeuristicSignal[]; urls?: UrlFinding[] } = {}): HeuristicReport {
   const signals: HeuristicSignal[] = [];
   const lower = text.toLowerCase();
   const scanned = context.trim() ? `${text}\n${context}` : text;
@@ -91,6 +92,7 @@ export function runHeuristics(text: string, context = ''): HeuristicReport {
 
   // Links
   const urls = extractUrls(text).map(analyzeUrl);
+  for (const u of extra.urls ?? []) if (!urls.some((x) => x.host === u.host)) urls.push(u);
   const risky = urls.filter((u) => u.risk >= 0.25).sort((a, b) => b.risk - a.risk);
   if (risky.length) {
     signals.push({
@@ -123,6 +125,7 @@ export function runHeuristics(text: string, context = ''): HeuristicReport {
     }
   }
 
+  signals.push(...(extra.signals ?? []));
   const score = Math.round(combine(signals) * 100);
 
   const categoryWeights = new Map<ScamCategory, number>();

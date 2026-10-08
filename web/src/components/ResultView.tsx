@@ -1,7 +1,7 @@
-import { Check, ChevronDown, CircleAlert, CircleCheck, Copy, Link2, ListChecks, Quote, RotateCcw, Share2, ShieldAlert, Siren } from 'lucide-react';
+import { ArrowRight, Check, ChevronDown, CircleAlert, CircleCheck, Copy, Globe, Link2, ListChecks, Quote, RotateCcw, Share2, ShieldAlert, Siren } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { AnalysisResult } from '../lib/types';
+import type { AnalysisResult, PageFinding } from '../lib/types';
 import { VERDICT_STYLE } from '../lib/verdict';
 import { Mascot } from './Mascot';
 import { RiskGauge } from './RiskGauge';
@@ -28,6 +28,80 @@ function summaryText(r: AnalysisResult): string {
     'Empfehlung:',
     ...r.recommendations.map((s, i) => `${i + 1}. ${s}`),
   ].join('\n');
+}
+
+function hostOf(url: string): string {
+  try {
+    return new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`).host;
+  } catch {
+    return url;
+  }
+}
+
+function domainAge(p: PageFinding): { text: string; tone: 'bad' | 'warn' | 'good' | 'none' } {
+  const d = p.domainAgeDays;
+  if (d == null) return { text: 'unbekannt', tone: 'none' };
+  if (d < 30) return { text: `${d} Tage – sehr neu`, tone: 'bad' };
+  if (d < 365) return { text: `${d} Tage`, tone: d < 180 ? 'warn' : 'none' };
+  const years = Math.floor(d / 365);
+  return { text: `${years} ${years === 1 ? 'Jahr' : 'Jahre'}`, tone: 'good' };
+}
+
+function PageCard({ page: p }: { page: PageFinding }) {
+  const age = domainAge(p);
+  const sensitive = p.asksPassword || p.asksPayment;
+  const chain = p.finalUrl ? [...p.redirects, p.finalUrl].map(hostOf).filter((h, i, all) => i === 0 || h !== all[i - 1]) : [];
+  return (
+    <li className="site-card">
+      <div className="site-head">
+        <code>{p.domain ?? hostOf(p.url)}</code>
+        <span className={`site-status ${p.ok ? 'is-ok' : 'is-bad'}`}>{p.finalUrl ? `HTTP ${p.status}` : 'nicht geöffnet'}</span>
+      </div>
+      {p.title && <strong className="site-title">„{p.title}“</strong>}
+      {chain.length > 1 && (
+        <div className="site-chain" aria-label="Weiterleitungen">
+          {chain.map((h, i) => (
+            <span key={`${h}-${i}`}>
+              {i > 0 && <ArrowRight size={13} aria-hidden="true" />}
+              {h}
+            </span>
+          ))}
+        </div>
+      )}
+      {p.error && <p className="site-error">{p.error}</p>}
+      <dl className="site-facts">
+        <div>
+          <dt>Domain-Alter</dt>
+          <dd className={`tone-${age.tone}`}>{age.text}</dd>
+        </div>
+        {p.finalUrl && (
+          <>
+            <div>
+              <dt>Impressum</dt>
+              <dd className={p.hasImprint ? 'tone-good' : p.looksLikeShop ? 'tone-bad' : 'tone-none'}>{p.hasImprint ? 'gefunden' : 'nicht gefunden'}</dd>
+            </div>
+            <div>
+              <dt>Zahlarten</dt>
+              <dd>{p.paymentMethods.length ? p.paymentMethods.join(', ') : 'keine erkannt'}</dd>
+            </div>
+            <div>
+              <dt>Eingabefelder</dt>
+              <dd className={sensitive ? 'tone-bad' : 'tone-none'}>
+                {sensitive ? [p.asksPassword && 'Passwort', p.asksPayment && 'Zahlungsdaten'].filter(Boolean).join(' & ') : 'keine sensiblen'}
+              </dd>
+            </div>
+          </>
+        )}
+      </dl>
+      {p.issues.length > 0 && (
+        <ul className="site-issues">
+          {p.issues.map((issue) => (
+            <li key={issue}>{issue}</li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
 }
 
 interface ResultViewProps {
@@ -153,12 +227,26 @@ export function ResultView({ result: r, onReset, compact = false }: ResultViewPr
             </section>
           )}
 
+          {r.pages && r.pages.length > 0 && (
+            <section className="card card-pad result-section">
+              <h3>
+                <Globe size={20} aria-hidden="true" /> Webseiten-Check
+              </h3>
+              <p className="muted small">ScamCheck hat den Link in einer abgeschirmten Umgebung geöffnet – ohne JavaScript, ohne Cookies, ohne dass dein Gerät die Seite lädt.</p>
+              <ul className="site-list">
+                {r.pages.map((p) => (
+                  <PageCard key={p.url} page={p} />
+                ))}
+              </ul>
+            </section>
+          )}
+
           {r.urls.length > 0 && (
             <section className="card card-pad result-section">
               <h3>
                 <Link2 size={20} aria-hidden="true" /> Link-Analyse
               </h3>
-              <p className="muted small">Links werden nur untersucht, nie geöffnet.</p>
+              <p className="muted small">Aufbau und Schreibweise der Links im Detail.</p>
               <ul className="url-list">
                 {r.urls.map((u) => (
                   <li key={u.url}>

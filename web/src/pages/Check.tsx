@@ -17,13 +17,18 @@ interface Upload {
 
 type Phase = 'form' | 'running' | 'result';
 
+const hasLink = (t: string) => /https?:\/\/|www\.|\b[a-z0-9-]+\.(?:de|com|net|org|at|ch|eu|info|shop|store|online|xyz|top|io|co)\b/i.test(t);
+
 /** Live hint from Checky while the user fills in the form. */
-function liveTip(text: string, uploads: number, platform: Platform, visionReady: boolean): string {
+function liveTip(text: string, uploads: number, platform: Platform, visionReady: boolean, opensLinks: boolean): string {
   const t = text.trim();
   if (uploads && !visionReady) return 'Screenshots kann ich gerade nicht lesen – bitte kopiere den Text zusätzlich ins Feld.';
   if (!t && uploads) return 'Super, ich schaue mir den Screenshot an. Ein paar Worte dazu helfen mir zusätzlich.';
   if (!t) return `Hi, ich bin ${MASCOT_NAME}! Füge die verdächtige Nachricht oder Anzeige ein – ich sage dir, was ich davon halte.`;
-  if (/https?:\/\/|www\.|\.[a-z]{2,6}\//i.test(t)) return 'Ich sehe einen Link. Keine Sorge: Ich öffne ihn nicht, ich untersuche nur, wohin er führt.';
+  if (hasLink(t))
+    return opensLinks
+      ? 'Ich sehe einen Link. Den öffne ich gleich in einer abgeschirmten Umgebung – dein Gerät lädt die Seite dabei nicht.'
+      : 'Ich sehe einen Link. Ich untersuche genau, wie er aufgebaut ist und wohin er führt.';
   if (/\b(tan|pin|passwort|code)\b/i.test(t)) return 'Es geht um Codes oder Passwörter? Gib die niemals weiter, bevor wir das geprüft haben!';
   if (t.length < 40) return 'Je mehr Text du einfügst, desto genauer kann ich prüfen – gern die ganze Nachricht.';
   if (platform === 'unknown') return 'Verrätst du mir noch, wo du das gesehen hast? Das hilft mir bei der Einordnung.';
@@ -50,7 +55,8 @@ export function CheckPage() {
   const maxMB = meta?.limits.maxImageMB ?? 6;
   const maxChars = meta?.limits.maxTextChars ?? 12000;
   const visionReady = Boolean(meta?.ai.ready && meta.ai.vision);
-  const tip = useMemo(() => liveTip(text, uploads.length, platform, visionReady), [text, uploads.length, platform, visionReady]);
+  const opensLinks = Boolean(meta?.web?.fetchPages);
+  const tip = useMemo(() => liveTip(text, uploads.length, platform, visionReady, opensLinks), [text, uploads.length, platform, visionReady, opensLinks]);
 
   const addFiles = useCallback(
     (files: FileList | File[]) => {
@@ -281,6 +287,11 @@ export function CheckPage() {
                   <li>
                     <strong>Link-Analyse</strong> erkennt gefälschte Domains, Verkürzer und Tippfehler-Adressen
                   </li>
+                  {opensLinks && (
+                    <li>
+                      <strong>Webseiten-Check</strong> öffnet Links abgeschirmt und prüft Domain-Alter, Impressum, Zahlarten und Formulare
+                    </li>
+                  )}
                   <li>
                     <strong>KI-Bewertung</strong>{' '}
                     {meta?.ai.ready ? (
@@ -337,7 +348,13 @@ export function CheckPage() {
 
       {phase === 'running' && (
         <div className="check-running">
-          <AnalysisProgress ai={Boolean(meta?.ai.ready)} hasImages={uploads.length > 0} done={pending !== null} onComplete={finish} />
+          <AnalysisProgress
+            ai={Boolean(meta?.ai.ready)}
+            hasImages={uploads.length > 0}
+            opensLinks={opensLinks && hasLink(text)}
+            done={pending !== null}
+            onComplete={finish}
+          />
         </div>
       )}
 

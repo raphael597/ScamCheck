@@ -30,7 +30,8 @@ export function demoRouter(ctx: AppContext): Router {
       if (!ctx.settings.aiReady()) throw new HttpError(409, 'Kein KI-Anbieter konfiguriert.');
       // Live runs cost API credits and therefore share the public rate limit.
       ctx.limiters.check.enforce(req, res, 'Du hast das Limit für Prüfungen erreicht.');
-      const result = await analyze({ text: demo.text, context: demo.context, platform: demo.platform, images: [] }, ctx.settings);
+      // Demo domains are made up – never open them.
+      const result = await analyze({ text: demo.text, context: demo.context, platform: demo.platform, images: [] }, ctx.settings, { fetchPages: false });
       return res.json(result);
     }
 
@@ -44,6 +45,7 @@ export function demoRouter(ctx: AppContext): Router {
       categoryLabel: CATEGORY_LABELS[demo.sample.category],
       signals: report.signals,
       urls: report.urls,
+      pages: [],
       heuristicScore: report.score,
       engine: { mode: 'demo', durationMs: Date.now() - started },
     };

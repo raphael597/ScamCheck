@@ -39,6 +39,30 @@ export interface UrlFinding {
   issues: string[];
 }
 
+export interface PageFinding {
+  url: string;
+  finalUrl: string | null;
+  redirects: string[];
+  status: number | null;
+  ok: boolean;
+  error?: string;
+  title: string;
+  description: string;
+  domain: string | null;
+  hasImprint: boolean | null;
+  hasPrivacy: boolean | null;
+  hasTerms: boolean | null;
+  looksLikeShop: boolean;
+  paymentMethods: string[];
+  asksPassword: boolean;
+  asksPayment: boolean;
+  formTargets: string[];
+  domainCreated: string | null;
+  domainAgeDays: number | null;
+  issues: string[];
+  durationMs: number;
+}
+
 export interface AnalysisResult {
   id: string;
   createdAt: string;
@@ -58,6 +82,7 @@ export interface AnalysisResult {
   extractedText: string;
   signals: HeuristicSignal[];
   urls: UrlFinding[];
+  pages?: PageFinding[];
   heuristicScore: number;
   engine: { mode: 'ai' | 'heuristic' | 'demo'; provider?: string; model?: string; durationMs: number; fallbackReason?: string };
 }
@@ -67,6 +92,7 @@ export interface Meta {
   ai: { ready: boolean; provider: string; model: string | null; vision: boolean };
   limits: { maxImages: number; maxImageMB: number; maxTextChars: number; checksPerHour: number };
   news: { aiExplain: boolean };
+  web?: { fetchPages: boolean };
   stats: { totalChecks: number; warned: number; aiChecks: number; topCategories: { category: string; count: number }[] };
 }
 
@@ -149,6 +175,7 @@ export interface AdminSettings {
   prompt: { systemOverride: string | null; defaultPrompt: string };
   news: { feeds: FeedConfig[]; refreshMinutes: number; aiExplain: boolean };
   limits: { checksPerHour: number; explainPerHour: number };
+  web: { fetchPages: boolean; domainAge: boolean; maxPages: number };
   locked: string[];
 }
 
