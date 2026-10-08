@@ -257,9 +257,17 @@ main {
   max-width: 78ch;
 }
 
-.footer-legal strong {
+.footer-legal a:any-link {
   color: var(--ink-2);
   font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  transition: text-decoration-color 150ms;
+}
+
+.footer-legal a:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
 }
 
 .admin-link {
