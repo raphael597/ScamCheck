@@ -246,13 +246,28 @@ main {
   margin-top: 36px;
   padding-top: 20px;
   border-top: 1px solid var(--line);
+  display: grid;
+  gap: 6px;
   font-size: 0.88rem;
   color: var(--ink-3);
 }
 
-.footer-legal strong {
+.footer-legal p {
+  margin: 0;
+  max-width: 78ch;
+}
+
+.footer-legal a:any-link {
   color: var(--ink-2);
   font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  transition: text-decoration-color 150ms;
+}
+
+.footer-legal a:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
 }
 
 .admin-link {
