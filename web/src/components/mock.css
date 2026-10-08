@@ -1,0 +1,288 @@
+.mock {
+  position: relative;
+  border-radius: 26px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  font-size: 0.98rem;
+}
+
+.mock-chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--ink-3);
+}
+
+.mock-app {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.mock-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.mock-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.mock-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.55;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--blue-500);
+  animation: caret 0.8s steps(2) infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9db5d9, #6f87b0);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* Chat (SMS, WhatsApp, marketplace, job, rental) */
+.mock-chat {
+  padding: 16px;
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 0) 0 0 / 18px 18px,
+    var(--surface-2);
+  min-height: 280px;
+}
+
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.chat-head > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+}
+
+.chat-head small {
+  color: var(--ink-3);
+  font-size: 0.82rem;
+}
+
+.chat-price {
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--teal-100);
+  color: var(--teal-600);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.chat-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 auto 14px;
+  padding: 6px 12px;
+  width: fit-content;
+  border-radius: 10px;
+  background: var(--suspicious-bg);
+  color: color-mix(in srgb, var(--suspicious) 75%, var(--ink));
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.chat-bubble {
+  max-width: 92%;
+  padding: 12px 14px;
+  border-radius: 6px 18px 18px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
+.mock--whatsapp .chat-bubble,
+.mock--job .chat-bubble {
+  background: color-mix(in srgb, #25d366 10%, var(--surface));
+}
+
+/* E-mail */
+.mock-mail {
+  padding: 4px 0 0;
+}
+
+.mail-row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 10px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.92rem;
+}
+
+.mail-row span {
+  color: var(--ink-3);
+}
+
+.mail-row strong {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.mail-body {
+  padding: 18px;
+  min-height: 220px;
+}
+
+/* Social post */
+.mock-post {
+  padding: 18px;
+  min-height: 260px;
+}
+
+.post-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.post-head span:last-child {
+  display: grid;
+}
+
+.post-head small {
+  color: var(--ink-3);
+}
+
+/* Shop */
+.shop-url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink-2);
+}
+
+.shop-product {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 18px;
+  padding: 18px;
+  min-height: 230px;
+}
+
+.shop-img {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--blue-100), var(--teal-100));
+  color: var(--blue-500);
+}
+
+.shop-price {
+  font-family: var(--font-display);
+  font-weight: 760;
+  font-size: 1.3rem;
+  color: var(--scam);
+  margin-bottom: 8px;
+}
+
+/* Evidence highlights */
+.hl {
+  --c: var(--suspicious);
+  color: inherit;
+  background: linear-gradient(transparent 55%, color-mix(in srgb, var(--c) 35%, transparent) 55%);
+  border-radius: 3px;
+  padding: 0 1px;
+  box-shadow: 0 0 0 0 transparent;
+  animation: hl-in 600ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 260ms);
+}
+
+.hl.sev-high {
+  --c: var(--scam);
+}
+.hl.sev-low {
+  --c: var(--unclear);
+}
+
+@keyframes hl-in {
+  0% {
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    box-shadow: 0 0 0 0 transparent;
+  }
+  60% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 25%, transparent);
+  }
+  100% {
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* Scanning beam */
+.mock-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgba(63, 214, 255, 0.12) 46%, rgba(63, 214, 255, 0.55) 50%, rgba(63, 214, 255, 0.12) 54%, transparent 100%);
+  background-size: 100% 260%;
+  animation: scan-sweep 1.5s ease-in-out infinite alternate;
+}
+
+.mock.is-scanning {
+  box-shadow: var(--shadow-lg), 0 0 0 2px color-mix(in srgb, var(--cyan) 60%, transparent), 0 0 40px -6px color-mix(in srgb, var(--cyan) 60%, transparent);
+}
+
+@media (max-width: 560px) {
+  .shop-product {
+    grid-template-columns: 1fr;
+  }
+  .shop-img {
+    width: 90px;
+  }
+}

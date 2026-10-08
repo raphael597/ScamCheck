@@ -1,0 +1,21 @@
+{
+  "name": "scamcheck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ScamCheck – Web-App zum Prüfen verdächtiger Anzeigen, Nachrichten und Beiträge auf Betrug",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "npm run start -w server",
+    "test": "npm test -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web"
+  }
+}

@@ -1,0 +1,177 @@
+.help-head .bubble {
+  max-width: 22ch;
+}
+
+.emergency-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.emergency-call {
+  --c: var(--scam);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--c) 30%, var(--line));
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 200ms var(--ease-out);
+}
+
+.emergency-call:hover {
+  transform: translateY(-2px);
+}
+
+.emergency-call > svg {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  padding: 11px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  color: var(--c);
+}
+
+.emergency-call span {
+  display: grid;
+}
+
+.emergency-call strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.emergency-call small {
+  color: var(--ink-3);
+}
+
+.emergency-call.is-police {
+  --c: var(--blue-600);
+}
+
+.emergency-call.is-support {
+  --c: var(--teal-500);
+}
+
+.situations h2,
+.contacts h2 {
+  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+}
+
+.situation-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.situation-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms,
+    background-color 160ms;
+}
+
+.situation-tab svg {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.situation-tab.is-active {
+  border-color: var(--blue-500);
+  background: var(--blue-100);
+  box-shadow: inset 0 0 0 1px var(--blue-500);
+}
+
+.situation-tab.is-active svg {
+  color: var(--blue-600);
+}
+
+.help-steps {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.help-steps li {
+  animation: rise-in 400ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 60ms);
+}
+
+.contacts {
+  margin-top: 40px;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.contact-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.contact-group li {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.contact-group li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.contact-name {
+  font-size: 0.88rem;
+  color: var(--ink-3);
+}
+
+.contact-value {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  word-break: break-word;
+}
+
+@media (max-width: 900px) {
+  .situation-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .emergency-strip {
+    grid-template-columns: 1fr;
+  }
+  .situation-tabs {
+    grid-template-columns: 1fr;
+  }
+}
